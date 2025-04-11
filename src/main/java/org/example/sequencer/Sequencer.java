@@ -11,10 +11,10 @@ import static org.example.sequencer.Config.*;
 public class Sequencer {
 
     private static int sequencerID = 0;
-    private static final String sequencerIP = SEQUENCER_IP;
+    private static final String sequencerIP = SEQUENCER.getIpAddress();
 
     public static void main(String[] args) {
-        try (DatagramSocket aSocket = new DatagramSocket(SEQUENCER_PORT, InetAddress.getByName(sequencerIP))) {
+        try (DatagramSocket aSocket = new DatagramSocket(SEQUENCER.getSocketPortNumber(), InetAddress.getByName(sequencerIP))) {
             byte[] buffer = new byte[1000];
             System.out.println("Sequencer UDP Server Started");
             while (true) {
@@ -73,11 +73,31 @@ public class Sequencer {
             try {
                 aSocket = new DatagramSocket();
                 byte[] messages = finalMessage.getBytes();
-                InetAddress aHost = InetAddress.getByName(Config.getReplicaAddress(i));
+                if (i == 0){
+                    InetAddress aHost = InetAddress.getByName(REPLICA1.getIpAddress());
 
-                DatagramPacket request = new DatagramPacket(messages,
-                        messages.length, aHost, Config.getReplicaPort(i));
-                aSocket.send(request);
+                    DatagramPacket request = new DatagramPacket(messages,
+                            messages.length, aHost, REPLICA1.getPortNumber());
+                    aSocket.send(request);
+                }else if (i == 1){
+                    InetAddress aHost = InetAddress.getByName(REPLICA2.getIpAddress());
+
+                    DatagramPacket request = new DatagramPacket(messages,
+                            messages.length, aHost, REPLICA2.getPortNumber());
+                    aSocket.send(request);
+                }else if (i == 2){
+                    InetAddress aHost = InetAddress.getByName(REPLICA3.getIpAddress());
+
+                    DatagramPacket request = new DatagramPacket(messages,
+                            messages.length, aHost, REPLICA3.getPortNumber());
+                    aSocket.send(request);
+                }else if (i == 3){
+                    InetAddress aHost = InetAddress.getByName(REPLICA4.getIpAddress());
+
+                    DatagramPacket request = new DatagramPacket(messages,
+                            messages.length, aHost, REPLICA4.getPortNumber());
+                    aSocket.send(request);
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }
