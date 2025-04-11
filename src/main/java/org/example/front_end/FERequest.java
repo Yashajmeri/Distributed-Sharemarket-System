@@ -1,5 +1,5 @@
 package org.example.front_end;
-
+import static org.example.sequencer.Config.SEQUENCER;
 public class FERequest {
 
 
@@ -9,7 +9,7 @@ public class FERequest {
     private String oldShareType = "null";
     private String shareID = "null";
     private String oldShareId = "null";
-    private String FE_IP_Address = "192.168.230.151";
+    private String FE_IP_Address = SEQUENCER.getIpAddress();
     private int shareUnits = 0;
     private int sequenceNumber = 0;
     private String MessageType = "00";
