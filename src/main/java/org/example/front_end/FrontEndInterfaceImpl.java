@@ -62,11 +62,11 @@ public class FrontEndInterfaceImpl {
             throw new IllegalArgumentException("requestFromClient cannot be null");
         }
         System.out.println("DSMS_Implementation:sendUnicastToSequencer ->" + requestFromClient.toString());
-        try (DatagramSocket aSocket = new DatagramSocket(FRONT_END_SQ.getPortNumber())) {
+        try (DatagramSocket aSocket = new DatagramSocket(FRONT_END.getSocketPortNumber())) {
             String dataFromClient = requestFromClient.toString();
             byte[] message = dataFromClient.getBytes();
             InetAddress aHost = InetAddress.getByName(SEQUENCER.getIpAddress());
-            DatagramPacket requestToSequencer = new DatagramPacket(message, message.length, aHost, SEQUENCER.getPortNumber());
+            DatagramPacket requestToSequencer = new DatagramPacket(message, message.length, aHost, SEQUENCER.getSocketPortNumber());
             aSocket.send(requestToSequencer);
             aSocket.setSoTimeout(1000);
             // Receiving

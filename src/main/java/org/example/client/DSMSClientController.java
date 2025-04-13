@@ -1,10 +1,11 @@
 package org.example.client;
 
 import org.example.front_end.DSMSInterface;
+import org.example.sequencer.Config;
 
 import javax.xml.namespace.QName;
 import javax.xml.ws.Service;
-import java.net.URL;
+import java.net.URI;
 import java.util.Scanner;
 
 public class DSMSClientController {
@@ -32,9 +33,17 @@ public class DSMSClientController {
 
     private void connectToFrontEnd() {
         try {
-            URL url = new URL("http://192.168.230.151:4555/FrontEnd?wsdl");
+            URI uri = new URI(
+                    "http",
+                    null,
+                    Config.FRONT_END.getIpAddress(),
+                    Config.FRONT_END.getPortNumber(),
+                    "/FrontEnd",
+                    "wsdl",
+                    null
+            );
             QName qname = new QName("http://front_end.example.org/", "DSMSInterfaceImplService");
-            Service service = Service.create(url, qname);
+            Service service = Service.create(uri.toURL(), qname);
             dsms = service.getPort(DSMSInterface.class);
         } catch (Exception e) {
             System.err.println("Could not connect to Front-End: " + e.getMessage());
