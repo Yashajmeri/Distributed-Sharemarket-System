@@ -31,18 +31,13 @@ public class ReplicaManager {
 
     public static void main(String[] args) {
         Runnable task = () -> {
+            Thread executionThread = null;
             try (DatagramSocket socket = new DatagramSocket(currentReplica.getPortNumber())) {
                 byte[] buffer = new byte[1000];
                 logger.log(Level.INFO, REPLICA_MANAGER_NAME + " UDP started...");
-                Runnable requestThread = () -> {
-                    try {
-                        executeRequests();
-                    } catch (Exception e) {
-                        logger.log(Level.SEVERE, "Exception while executing requests : " + e.getMessage());
-                    }
-                };
-                Thread thread = new Thread(requestThread);
-                thread.start();
+
+                executionThread = new Thread(getExecutionThread());
+                executionThread.start();
 
                 while (true) {
                     DatagramPacket request = new DatagramPacket(buffer, buffer.length);
@@ -113,13 +108,28 @@ public class ReplicaManager {
                         case "42" -> {
                             Thread handlingCrashThread = getCrashThread();
                             handlingCrashThread.start();
-                            logger.log(Level.INFO, REPLICA_NAME + " handled the crash!!");
-                            isServerUp = true;
+
+                            try {
+                                handlingCrashThread.join();
+                                logger.log(Level.INFO, REPLICA_NAME + " crash handling complete. Server is up.");
+                                isServerUp = true;
+                            } catch (InterruptedException e) {
+                                logger.log(Level.SEVERE, REPLICA_NAME + " crash handling thread interrupted: " + e.getMessage());
+                                Thread.currentThread().interrupt();
+                            }
+
+                            if (!executionThread.isAlive()) {
+                                executionThread = new Thread(getExecutionThread());
+                                executionThread.start();
+                            }
                         }
                     }
                 }
             } catch (Exception e) {
-                System.out.println("Exception: " + e);
+                logger.log(Level.SEVERE, "Exception: " + e.getMessage());
+                if (executionThread != null && executionThread.isAlive()) {
+                    executionThread.interrupt();
+                }
             }
         };
         Thread thread = new Thread(task);
@@ -143,12 +153,24 @@ public class ReplicaManager {
         return new Thread(handlingCrashTask);
     }
 
+    private static Runnable getExecutionThread() {
+        return () -> {
+            try {
+                executeRequests();
+            } catch (Exception e) {
+                logger.log(Level.SEVERE, "Exception while executing requests : " + e.getMessage());
+            }
+        };
+    }
+
     private static void executeRequests() throws Exception {
         while (true) {
             synchronized (ReplicaManager.class) {
-                Iterator<Message> messageIterator = messageQueue.iterator();
-                while (messageIterator.hasNext()) {
-                    Message requestMessage = messageIterator.next();
+//                Iterator<Message> messageIterator = messageQueue.iterator();
+//                while (messageIterator.hasNext()) {
+                while (!messageQueue.isEmpty()) {
+//                    Message requestMessage = messageIterator.next();
+                    Message requestMessage = messageQueue.peek();
                     if (requestMessage.getSequenceID().equals(lastSequenceID) && isServerUp) {
                         logger.log(Level.INFO, REPLICA_NAME + " is executing message request. Request: " + requestMessage);
                         String response = processRequest(requestMessage);
