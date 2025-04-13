@@ -1,6 +1,5 @@
 package org.example.replica.replica2;
 
-import org.example.replica.replica2.ShareMarket;
 import org.example.replica.resource.ShareType;
 import org.example.replica.service.StockMarketService;
 

@@ -18,13 +18,5 @@ public class StockMarketPublisher {
         }
 
         threads.forEach(Thread::start);
-
-        threads.forEach((thread -> {
-            try {
-                thread.join();
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-        }));
     }
 }
