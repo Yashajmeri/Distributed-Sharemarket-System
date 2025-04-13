@@ -131,15 +131,15 @@ public class ServerResponse {
     private boolean isSuccess = false;
 
     public String getResponse() {
-        return "";
+        return response;
     }
 
     public int getSequenceID() {
-        return 0;
+        return sequenceID;
     }
 
     public Integer getRmNumber() {
-        return 0;
+        return rmNumber;
     }
 public boolean equals(Object obj) {
     if (obj != null) {
