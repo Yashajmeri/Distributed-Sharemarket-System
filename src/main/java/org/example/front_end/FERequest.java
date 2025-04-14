@@ -21,7 +21,7 @@ public class FERequest {
     }
 
     public FERequest(int rmNumber, String bugType) {
-        setMessageType(bugType + rmNumber);
+        setMessageType(rmNumber+bugType);
     }
 
     public String getUserID() {
