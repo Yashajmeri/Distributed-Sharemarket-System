@@ -9,10 +9,11 @@ import java.util.List;
 public class StockMarketPublisher {
     public static void main(String[] args) {
         List<Thread> threads = new ArrayList<>();
+        Config config = Config.REPLICA1;
 
         for (ShareMarket shareMarket : ShareMarket.values()) {
             StockMarketServiceImpl stockMarketService = new StockMarketServiceImpl(shareMarket);
-            Endpoint.publish("http://localhost:" + Config.REPLICA1.getPortNumber() + "/" + shareMarket.getCode(), stockMarketService);
+            Endpoint.publish("http://" + config.getIpAddress() + ":" + config.getPortNumber() + "/" + shareMarket.getCode(), stockMarketService);
             threads.add(new Thread(stockMarketService));
             System.out.println(shareMarket.getName() + " Service is published!");
         }
