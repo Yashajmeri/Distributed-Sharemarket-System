@@ -8,7 +8,6 @@ import java.net.InetAddress;
 import java.net.SocketException;
 
 import static org.example.sequencer.Config.FRONT_END;
-import static org.example.sequencer.Config.FRONT_END_SQ;
 import static org.example.sequencer.Config.SEQUENCER;
 
 public class FrontEndInterfaceImpl {

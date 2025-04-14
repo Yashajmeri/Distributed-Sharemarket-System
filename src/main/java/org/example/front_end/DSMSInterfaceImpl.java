@@ -50,7 +50,6 @@ public class DSMSInterfaceImpl implements DSMSInterface {
     }
 
 
-
     @Override
     public String addShare(String userID, String shareID, String shareType, Integer capacity) {
         FERequest request = new FERequest("addShare", userID);
@@ -107,6 +106,7 @@ public class DSMSInterfaceImpl implements DSMSInterface {
     public String sellShare(String userID, String buyerID, String shareID, Integer units) {
         FERequest request = new FERequest("sellShare", buyerID);
         request.setShareID(shareID);
+        request.setShareUnits(units);
         request.setSequenceNumber(forwardUdpUnicastToSequencer(request));
         System.out.println("DSMS_Implementation :  sellShare ->" + request);
 
@@ -212,13 +212,25 @@ public class DSMSInterfaceImpl implements DSMSInterface {
 
     // Response Analysis
     private Map<Integer, ServerResponse> getValidResponses(int sequenceNumber) {
-        return responses.stream()
-                .filter(r -> r.getSequenceID() == sequenceNumber)
-                .collect(Collectors.toMap(
-                        ServerResponse::getRmNumber,
-                        Function.identity(),
-                        (r1, r2) -> r1 // On duplicate, keep the first response
-                ));
+        Map<Integer, ServerResponse> resultMap = new HashMap<>();
+
+
+        for (ServerResponse response : responses) {
+
+            if (response.getSequenceID() == sequenceNumber) {
+
+                int rmNumber = response.getRmNumber();
+
+
+                if (!resultMap.containsKey(rmNumber)) {
+                    resultMap.put(rmNumber, response);
+                }
+
+            }
+        }
+
+        return resultMap;
+
     }
 
     private String findConsensusResponse(Map<Integer, ServerResponse> rmResponses) {
@@ -233,12 +245,13 @@ public class DSMSInterfaceImpl implements DSMSInterface {
         long Grade = validGrade(totalCount);
         return responseCounts.entrySet().stream()
                 .max(Map.Entry.comparingByValue())
-                .filter(e -> e.getValue() >=Grade) //  Majority responses
+                .filter(e -> e.getValue() >= Grade) //  Majority responses
                 .map(Map.Entry::getKey)
                 .orElse(null);
     }
+
     private long validGrade(long responseCount) {
-        if(responseCount % 2 ==0)
+        if (responseCount % 2 == 0)
             return responseCount / 2;
         else return (responseCount / 2) + 1;
     }
@@ -303,7 +316,7 @@ public class DSMSInterfaceImpl implements DSMSInterface {
     private void listenForUDPResponses() {
         final int MAX_UDP_PACKET_SIZE = 65507;
         try (DatagramSocket socket = new DatagramSocket(4545, InetAddress.getByName(FE_IP_Address));) {
-            //TODO : Setting proper Frontend port
+
             byte[] buffer = new byte[MAX_UDP_PACKET_SIZE];
             System.out.println("FRONT END Started on " + InetAddress.getByName(FE_IP_Address) + " : " + FE_IP_Address);
             while (!Thread.currentThread().isInterrupted()) {
@@ -311,8 +324,9 @@ public class DSMSInterfaceImpl implements DSMSInterface {
                     DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
                     socket.receive(packet);
                     String response = new String(packet.getData(), 0, packet.getLength()).trim();
-                    System.out.println("DSMS_Implementation :Response received from Replica ->" + response);
                     ServerResponse RmResponse = new ServerResponse(response);
+                    System.out.println("DSMS_Implementation :Response received from Replica "+ RmResponse.getRmNumber()+ "->" + response);
+
                     System.out.println("DSMS_Implementation : Receiving The Response ");
                     addReceivedResponse(RmResponse);
                 } catch (IOException e) {
