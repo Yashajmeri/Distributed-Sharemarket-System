@@ -63,12 +63,12 @@ package org.example.sequencer;
 //    }
 
 public enum Config {
-    FRONT_END("Front-End", "localhost", 4999, 4998),
-    SEQUENCER("Sequencer", "localhost", 5999, 5998),
-    REPLICA1("Replica1", "localhost", 6999, 6998),
-    REPLICA2("Replica2", "localhost", 7999, 7998),
-    REPLICA3("Replica3", "localhost", 8999, 8998),
-    REPLICA4("Replica4", "localhost", 9999, 9998),
+    FRONT_END("Front-End", "192.168.230.151", 4999, 4998),
+    SEQUENCER("Sequencer", "192.168.230.239", 5999, 5998),
+    REPLICA1("Replica1", "192.168.230.151", 6999, 6998),
+    REPLICA2("Replica2", "192.168.230.239", 7999, 7998),
+    REPLICA3("Replica3", "192.168.230.163", 8999, 8998),
+    REPLICA4("Replica4", "192.168.230.66", 9999, 9998),
     FRONT_END_SQ("FrontEnd-SQ", null, 8311, null);
     private final String name;
     private final String ipAddress;
